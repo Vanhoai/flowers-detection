@@ -1,104 +1,110 @@
 import os
 import yaml
+import argparse
 import numpy as np
-import tensorflow as tf
-from data.data_loader import DataLoader
-from models.flower_model import FlowerClassificationModel
-from training.trainer import ModelTrainer
+from datasets.data_loader import DataLoader
 from utils.visualization import (
     plot_sample_images,
     plot_confusion_matrix,
     visualize_model_predictions,
 )
+from models.flower_model import FlowerClassificationModel
+from training.trainer import ModelTrainer
 from evaluation.metrics import (
     evaluate_model_classification,
     plot_learning_curves,
     per_class_accuracy,
 )
-import argparse
+
+
+def save_Xy(X, y):
+    np.save("saved/X.npy", X)
+    np.save("saved/y.npy", y)
 
 
 def main():
-    # Đọc tham số từ dòng lệnh
     parser = argparse.ArgumentParser(description="Flower Classification Training")
     parser.add_argument(
         "--config",
         type=str,
         default="config/config.yaml",
-        help="Đường dẫn đến file cấu hình",
+        help="Path to yaml config file",
     )
     parser.add_argument(
         "--is_new_training",
         action="store_true",
-        help="Huấn luyện mô hình mới hoặc tiếp tục huấn luyện",
+        help="Train new model from scratch",
     )
     parser.add_argument(
         "--fine_tune",
         action="store_true",
-        help="Fine tune mô hình sau khi huấn luyện ban đầu",
+        help="Fine-tune existing model",
     )
     args = parser.parse_args()
-
-    # Đọc cấu hình
     with open(args.config, "r") as file:
         config = yaml.safe_load(file)
 
-    print("======= Khởi tạo DataLoader =======")
+    print("=================== Initialize DataLoader ===================")
     data_loader = DataLoader(args.config)
 
-    print("======= Tải và xử lý dữ liệu =======")
+    print("=================== Load Datasets ===================")
     X, y = data_loader.load_data()
+    save_Xy(X, y)
+    # X, y = np.load("saved/X.npy"), np.load("saved/y.npy")
 
-    print("======= Chia tập dữ liệu =======")
-    X_train, y_train, X_val, y_val = data_loader.prepare_datasets(X, y)
+    print("=================== Split Datasets ===================")
+    X_train, y_train, X_test, y_test = data_loader.prepare_datasets(X, y)
+    print(X_train.shape, y_train.shape, X_test.shape, y_test.shape)
 
-    print("======= Hiển thị một số mẫu dữ liệu =======")
-    plot_sample_images(X_train, y_train, config["classes"], n_samples=3)
+    print("=================== Show Sample Images ===================")
+    plot_sample_images(X_train, y_train, config["classes"])
 
-    print("======= Xây dựng mô hình =======")
-    model = FlowerClassificationModel(config)
+    print("=================== Build Model ===================")
+    flower_classification_model = FlowerClassificationModel(config)
     if args.is_new_training or not os.path.exists(
         config["training"]["checkpoint_path"]
     ):
-        model.build()
+        print("Build new model from scratch")
+        flower_classification_model.build()
     else:
-        print(
-            f"Tải mô hình đã được huấn luyện từ {config['training']['checkpoint_path']}"
-        )
-        model.load(config["training"]["checkpoint_path"])
+        print(f"Load model from {config['training']['checkpoint_path']}")
+        flower_classification_model.load(config["training"]["checkpoint_path"])
 
-    model.compile()
-    model.summary()
+    flower_classification_model.compile()
+    flower_classification_model.summary()
 
-    print("======= Huấn luyện mô hình =======")
-    trainer = ModelTrainer(model.model, args.config)
-    history = trainer.train(X_train, y_train, X_val, y_val)
+    print("=================== Training Model ===================")
+    trainer = ModelTrainer(flower_classification_model.model, args.config)
+    hist = trainer.train(X_train, y_train)
+    np.save("saved/hist.npy", hist)
 
-    print("======= Vẽ đồ thị quá trình huấn luyện =======")
-    trainer.plot_training_history(history)
-    plot_learning_curves(history)
+    print("=================== Draw Learning Curves ===================")
+    items = np.load("saved/hist.npy", allow_pickle=True).item()
+    trainer.plot_training_history(items.history)
+    plot_learning_curves(items.history)
 
     if args.fine_tune:
-        print("======= Fine-tuning mô hình =======")
-        model.fine_tune()
-        history_ft = trainer.train(X_train, y_train, X_val, y_val)
-        print("======= Vẽ đồ thị quá trình fine-tuning =======")
-        trainer.plot_training_history(history_ft)
+        print("=================== Fine-tuning Model ===================")
+        flower_classification_model = flower_classification_model.fine_tune()
+        flower_classification_model.compile()
+        flower_classification_model.summary()
+        history_ft = trainer.train(X_train, y_train)
+        print("=================== Draw Learning Curves ===================")
+        trainer.plot_training_history(history_ft.history)
 
-    print("======= Đánh giá mô hình trên tập validation =======")
-    y_pred = model.model.predict(X_val)
-    evaluate_model_classification(y_val, y_pred, config["classes"])
+    print("=================== Prediction ===================")
+    y_pred = flower_classification_model.predict(X_test)
+    evaluate_model_classification(y_test, y_pred, config["classes"])
 
-    print("======= Ma trận nhầm lẫn =======")
-    plot_confusion_matrix(y_val, y_pred, config["classes"])
+    print("=================== Confusion Matrix ===================")
+    plot_confusion_matrix(y_test, y_pred, config["classes"])
 
-    print("======= Độ chính xác cho từng lớp =======")
-    per_class_accuracy(y_val, y_pred, config["classes"])
+    print("=================== Accuracy per Class ===================")
+    per_class_accuracy(y_test, y_pred, config["classes"])
 
-    print("======= Hiển thị một số dự đoán =======")
-    visualize_model_predictions(model.model, X_val, y_val, config["classes"])
-
-    print(f"Mô hình đã được lưu tại {config['training']['checkpoint_path']}")
+    print("=================== Visualize Image Predicted ===================")
+    y_pred = flower_classification_model.predict(X_test)
+    visualize_model_predictions(X_test, y_pred, config["classes"])
 
 
 if __name__ == "__main__":

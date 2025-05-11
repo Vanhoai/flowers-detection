@@ -45,38 +45,29 @@ class ModelTrainer:
 
         return [checkpoint_callback, early_stopping, tensorboard, reduce_lr]
 
-    def train(self, X_train, y_train, X_val=None, y_val=None, validation_split=None):
-        if X_val is not None and y_val is not None:
-            validation_data = (X_val, y_val)
-            validation_split = None
-        else:
-            validation_data = None
-            validation_split = (
-                self.config["data"]["validation_split"]
-                if validation_split is None
-                else validation_split
-            )
+    def train(self, X_train, y_train, validation_split=None):
+        if validation_split is None:
+            validation_split = self.config["data"]["validation_split"]
 
-        history = self.model.fit(
+        hist = self.model.fit(
             X_train,
             y_train,
             epochs=self.epochs,
             batch_size=self.config["data"]["batch_size"],
             validation_split=validation_split,
-            validation_data=validation_data,
             callbacks=self.get_callbacks(),
             verbose=1,
         )
 
-        return history
+        return hist
 
     def plot_training_history(self, history):
         plt.figure(figsize=(12, 4))
 
         # Plot accuracy
         plt.subplot(1, 2, 1)
-        plt.plot(history.history["accuracy"])
-        plt.plot(history.history["val_accuracy"])
+        plt.plot(history["accuracy"])
+        plt.plot(history["val_accuracy"])
         plt.title("Model Accuracy")
         plt.ylabel("Accuracy")
         plt.xlabel("Epoch")
@@ -84,8 +75,8 @@ class ModelTrainer:
 
         # Plot loss
         plt.subplot(1, 2, 2)
-        plt.plot(history.history["loss"])
-        plt.plot(history.history["val_loss"])
+        plt.plot(history["loss"])
+        plt.plot(history["val_loss"])
         plt.title("Model Loss")
         plt.ylabel("Loss")
         plt.xlabel("Epoch")

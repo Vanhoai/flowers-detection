@@ -6,43 +6,36 @@ import cv2
 import tensorflow as tf
 
 
-def plot_sample_images(X, y, classes, n_samples=5, figsize=(15, 10)):
-    """Hiển thị một số mẫu hình ảnh từ mỗi lớp"""
-    num_classes = len(classes)
-    fig, axes = plt.subplots(num_classes, n_samples, figsize=figsize)
+def plot_sample_images(X, y, classes, n_samples=10, figsize=(15, 8)):
+    n_cols = 5
+    n_rows = 2
 
-    for i in range(num_classes):
-        # Lấy chỉ mục của các hình ảnh thuộc lớp i
-        indices = np.where(np.argmax(y, axis=1) == i)[0]
+    width = 4 * n_cols
+    height = 4 * n_rows
 
-        # Chọn ngẫu nhiên n_samples từ lớp
-        selected_indices = np.random.choice(
-            indices, size=min(n_samples, len(indices)), replace=False
-        )
+    plt.close("all")
+    fig, axs = plt.subplots(n_rows, n_cols, figsize=(width, height))
+    for i in range(n_samples):
+        r = i // n_cols
+        c = i % n_cols
 
-        for j, idx in enumerate(selected_indices):
-            if num_classes > 1:
-                ax = axes[i, j]
-            else:
-                ax = axes[j]
+        img = X[i]
+        label = classes[y[i]]
+        if n_rows > 1:
+            axs[r, c].imshow(img)
+            axs[r, c].set_title(label)
+        else:
+            axs[c].imshow(img)
+            axs[c].set_title(label)
 
-            # Hiển thị hình ảnh
-            img = X[idx]
-            # Chuyển đổi từ [0,1] về [0,255] nếu cần thiết
-            if img.max() <= 1.0:
-                img = (img * 255).astype(np.uint8)
-
-            ax.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-            ax.set_title(f"{classes[i]}")
-            ax.axis("off")
+        plt.axis("off")
 
     plt.tight_layout()
     plt.show()
 
 
 def plot_confusion_matrix(y_true, y_pred, classes, figsize=(10, 8)):
-    """Vẽ ma trận nhầm lẫn"""
-    y_true_classes = np.argmax(y_true, axis=1)
+    y_true_classes = y_true
     y_pred_classes = np.argmax(y_pred, axis=1)
 
     cm = confusion_matrix(y_true_classes, y_pred_classes)
@@ -56,35 +49,31 @@ def plot_confusion_matrix(y_true, y_pred, classes, figsize=(10, 8)):
     plt.show()
 
 
-def visualize_model_predictions(model, X_sample, y_sample, classes, n_samples=5):
-    """Hiển thị dự đoán của mô hình trên một số mẫu"""
-    # Chọn ngẫu nhiên các mẫu
-    indices = np.random.choice(range(len(X_sample)), n_samples, replace=False)
-    X_display = X_sample[indices]
-    y_true = np.argmax(y_sample[indices], axis=1)
+def visualize_model_predictions(X, y, classes, n_samples=10):
+    y = np.argmax(y, axis=1)
 
-    # Dự đoán
-    predictions = model.predict(X_display)
-    y_pred = np.argmax(predictions, axis=1)
+    n_cols = 5
+    n_rows = 2
 
-    # Hiển thị
-    fig, axes = plt.subplots(1, n_samples, figsize=(15, 3))
+    width = 4 * n_cols
+    height = 4 * n_rows
 
-    for i, (img, true_idx, pred_idx) in enumerate(zip(X_display, y_true, y_pred)):
-        ax = axes[i]
+    plt.close("all")
+    fig, axs = plt.subplots(n_rows, n_cols, figsize=(width, height))
+    for i in range(n_samples):
+        r = i // n_cols
+        c = i % n_cols
 
-        # Chuyển đổi từ [0,1] về [0,255] nếu cần thiết
-        if img.max() <= 1.0:
-            img = (img * 255).astype(np.uint8)
+        img = X[i]
+        label = classes[y[i]]
+        if n_rows > 1:
+            axs[r, c].imshow(img)
+            axs[r, c].set_title(label)
+        else:
+            axs[c].imshow(img)
+            axs[c].set_title(label)
 
-        ax.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-
-        # Đặt màu cho tiêu đề dựa trên dự đoán đúng/sai
-        title_color = "green" if true_idx == pred_idx else "red"
-        ax.set_title(
-            f"True: {classes[true_idx]}\nPred: {classes[pred_idx]}", color=title_color
-        )
-        ax.axis("off")
+        plt.axis("off")
 
     plt.tight_layout()
     plt.show()

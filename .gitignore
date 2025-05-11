@@ -40,6 +40,7 @@ tests/save_dir
 tests/tests_tt_dir/
 processed/
 raw/
+logs/
 
 # only source testing
 flowers
@@ -65,6 +66,12 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+
+# Numpy
+*.npy
+
+# Keras
+*.keras
 
 # Translations
 *.mo

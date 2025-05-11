@@ -11,8 +11,6 @@ import matplotlib.pyplot as plt
 
 
 def evaluate_model_classification(y_true, y_pred, classes=None):
-    """Đánh giá các chỉ số hiệu suất cho bài toán phân loại"""
-    # Chuyển đổi one-hot encoding thành các nhãn lớp
     if y_true.ndim > 1 and y_true.shape[1] > 1:
         y_true_labels = np.argmax(y_true, axis=1)
     else:
@@ -25,7 +23,6 @@ def evaluate_model_classification(y_true, y_pred, classes=None):
         y_pred_labels = y_pred
         y_pred_probs = None
 
-    # Tính toán các chỉ số
     accuracy = accuracy_score(y_true_labels, y_pred_labels)
     precision = precision_score(
         y_true_labels, y_pred_labels, average="weighted", zero_division=0
@@ -35,13 +32,11 @@ def evaluate_model_classification(y_true, y_pred, classes=None):
     )
     f1 = f1_score(y_true_labels, y_pred_labels, average="weighted", zero_division=0)
 
-    # In kết quả
     print(f"Accuracy: {accuracy:.4f}")
     print(f"Precision: {precision:.4f}")
     print(f"Recall: {recall:.4f}")
     print(f"F1 Score: {f1:.4f}")
 
-    # Báo cáo chi tiết
     if classes is not None:
         print("\nClassification Report:")
         print(
@@ -50,7 +45,6 @@ def evaluate_model_classification(y_true, y_pred, classes=None):
             )
         )
 
-    # Tính ROC AUC nếu có xác suất dự đoán
     if y_pred_probs is not None and y_true.ndim > 1 and y_true.shape[1] > 1:
         try:
             auc = roc_auc_score(
@@ -61,49 +55,49 @@ def evaluate_model_classification(y_true, y_pred, classes=None):
             print(f"Could not calculate ROC AUC: {e}")
 
     results = {"accuracy": accuracy, "precision": precision, "recall": recall, "f1": f1}
-
     return results
 
 
 def plot_learning_curves(history):
-    """Vẽ đường cong học (learning curves) từ lịch sử training"""
-    metrics = list(history.history.keys())
+    metrics = list(history.keys())
     train_metrics = [m for m in metrics if not m.startswith("val_")]
 
-    n_rows = len(train_metrics)
-    plt.figure(figsize=(12, 4 * n_rows))
+    n_rows = 1
+    n_cols = len(train_metrics)
+
+    width = 4 * n_cols
+    height = 4 * n_rows
+
+    plt.close("all")
+    _, axs = plt.subplots(n_rows, n_cols, figsize=(width, height))
 
     for i, metric in enumerate(train_metrics):
-        plt.subplot(n_rows, 1, i + 1)
-        plt.plot(history.history[metric], label=f"Training {metric}")
+        axs[i].plot(history[metric], label=f"Training {metric}")
         val_metric = f"val_{metric}"
         if val_metric in metrics:
-            plt.plot(history.history[val_metric], label=f"Validation {metric}")
-        plt.title(f"Model {metric}")
-        plt.ylabel(metric.capitalize())
-        plt.xlabel("Epoch")
-        plt.legend()
-        plt.grid(True)
+            axs[i].plot(history[val_metric], label=f"Validation {metric}")
+
+        axs[i].set_title(f"Model {metric}")
+        axs[i].set_ylabel(metric.capitalize())
+        axs[i].set_xlabel("Epoch")
+        axs[i].legend()
+        axs[i].grid(True)
 
     plt.tight_layout()
     plt.show()
 
 
 def per_class_accuracy(y_true, y_pred, classes):
-    """Tính độ chính xác cho từng lớp"""
     if y_true.ndim > 1:
         y_true = np.argmax(y_true, axis=1)
     if y_pred.ndim > 1:
         y_pred = np.argmax(y_pred, axis=1)
 
     results = {}
-
     for i, class_name in enumerate(classes):
-        # Chỉ mục của các mẫu thuộc lớp i
         class_indices = np.where(y_true == i)[0]
 
         if len(class_indices) > 0:
-            # Độ chính xác trên các mẫu của lớp i
             class_accuracy = accuracy_score(
                 y_true[class_indices], y_pred[class_indices]
             )
