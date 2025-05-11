@@ -108,35 +108,3 @@ def per_class_accuracy(y_true, y_pred, classes):
             print(f"No samples for class {class_name}")
 
     return results
-
-
-def find_misclassified_samples(X, y_true, y_pred, classes, max_samples=10):
-    """Tìm và trả về các mẫu bị phân loại sai"""
-    if y_true.ndim > 1:
-        y_true = np.argmax(y_true, axis=1)
-    if y_pred.ndim > 1:
-        y_pred = np.argmax(y_pred, axis=1)
-
-    # Tìm các chỉ mục mà dự đoán khác với nhãn thật
-    misclassified_indices = np.where(y_true != y_pred)[0]
-
-    # Lấy tối đa max_samples mẫu
-    sample_indices = misclassified_indices[
-        : min(max_samples, len(misclassified_indices))
-    ]
-
-    if len(sample_indices) == 0:
-        print("No misclassified samples found!")
-        return None
-
-    # Tạo danh sách các mẫu bị phân loại sai
-    misclassified_samples = {
-        "indices": sample_indices,
-        "X": X[sample_indices],
-        "true_labels": y_true[sample_indices],
-        "pred_labels": y_pred[sample_indices],
-        "true_class_names": [classes[i] for i in y_true[sample_indices]],
-        "pred_class_names": [classes[i] for i in y_pred[sample_indices]],
-    }
-
-    return misclassified_samples

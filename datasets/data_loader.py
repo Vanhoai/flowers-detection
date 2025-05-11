@@ -53,87 +53,23 @@ class DataLoader:
             self.data_augmentation.add(random_translation)
 
     def load_data(self):
-        # print("=================== Load Datasets ===================")
-        # X = np.zeros((self.num_classes * self.ipc, *self.image_size, 3), dtype=int)
-        # y = np.zeros(self.num_classes * self.ipc, dtype=int)
+        X = np.zeros((self.nums_classes * self.ipc, *self.image_size, 3), dtype=int)
+        y = np.zeros(self.nums_classes * self.ipc, dtype=int)
+        for i in range(self.nums_classes):
+            y[i * self.ipc : (i + 1) * self.ipc] = i
 
-        # for i in range(self.num_classes):
-        #     y[i * self.ipc : (i + 1) * self.ipc] = i
-
-        # for i in range(self.num_classes):
-        #     category = os.path.join(self.datasets_path, str(i + 1))
-        #     files = os.listdir(category)
-
-        #     XI = np.zeros((self.ipc, *self.image_size, 3), dtype=int)
-        #     count = 0
-
-        #     size_images = len(files)
-        #     size_gen = np.ceil(self.ipc / size_images).astype(int)
-
-        #     for path in files:
-        #         img_path = os.path.join(category, path)
-        #         if not os.path.isfile(img_path) or path.startswith("."):
-        #             continue
-
-        #         img = cv2.imread(img_path)
-        #         if img is None or count >= self.ipc:
-        #             continue
-
-        #         img = cv2.resize(img, self.image_size)
-
-        #         XI[count] = img
-        #         count += 1
-
-        #         # Generate augmented images
-        #         for _ in range(size_gen - 1):
-        #             if count >= self.ipc:
-        #                 break
-
-        #             # img_tensor = tf.convert_to_tensor(img)
-        #             # new_image = self.data_augmentation(tf.expand_dims(img_tensor, 0))[0]
-        #             # XI[count] = new_image.numpy()
-
-        #             new_image = self.data_augmentation(img)
-        #             XI[count] = new_image
-        #             count += 1
-
-        #     print(f"Category: {category} -> {self.classes[i]}")
-        #     print(f"Range: {i * self.ipc}: {(i + 1) * self.ipc}")
-        #     X[i * self.ipc : (i + 1) * self.ipc] = XI
-
-        # # Remove image if all pixels are zero (generated error)
-        # non_zero_indices = []
-        # for i in range(X.shape[0]):
-        #     if np.sum(X[i]) > 0:
-        #         non_zero_indices.append(i)
-
-        # X_cleaned = X[non_zero_indices]
-        # y_cleaned = y[non_zero_indices]
-
-        # return X_cleaned, y_cleaned
-
-        nums_classes = self.num_classes
-        flowers = self.datasets_path
-        IMAGE_LEN = self.ipc
-        IMAGE_SIZE = self.image_size
-
-        X = np.zeros((nums_classes * IMAGE_LEN, *IMAGE_SIZE, 3), dtype=int)
-        y = np.zeros(nums_classes * IMAGE_LEN, dtype=int)
-        for i in range(nums_classes):
-            y[i * IMAGE_LEN : (i + 1) * IMAGE_LEN] = i
-
-        for i in range(nums_classes):
-            category = os.path.join(flowers, str(i + 1))
+        for i in range(self.nums_classes):
+            category = os.path.join(self.datasets_path, str(i + 1))
             files = os.listdir(category)
 
-            XI = np.zeros((IMAGE_LEN, *IMAGE_SIZE, 3))
+            XI = np.zeros((self.ipc, *self.image_size, 3))
             count = 0
 
             size_images = files.__len__()
-            size_gen = np.ceil(IMAGE_LEN / size_images).astype(int)
+            size_gen = np.ceil(self.ipc / size_images).astype(int)
             for path in files:
                 img = cv2.imread(os.path.join(category, path))
-                if (img is None) or count >= IMAGE_LEN:  # avoid .DS_Store file
+                if (img is None) or count >= self.ipc:  # avoid .DS_Store file
                     continue
                 img = cv2.resize(img, (200, 200))
 
@@ -141,7 +77,7 @@ class DataLoader:
                 count += 1
 
                 for _ in range(size_gen - 1):
-                    if count >= IMAGE_LEN:
+                    if count >= self.ipc:
                         break
 
                     new_image = self.data_augmentation(img)
@@ -149,8 +85,8 @@ class DataLoader:
                     count += 1
 
             print(f"category: {category} -> {self.classes[i]}")
-            print(f"Range: {i * IMAGE_LEN}: {(i + 1) * IMAGE_LEN}")
-            X[i * IMAGE_LEN : (i + 1) * IMAGE_LEN] = XI
+            print(f"Range: {i * self.ipc}: {(i + 1) * self.ipc}")
+            X[i * self.ipc : (i + 1) * self.ipc] = XI
 
         # ignore image gen error -> zero matrix
         non_zero_indices = []
