@@ -1,0 +1,41 @@
+data:
+  train_path: "/Users/aurorastudyvn/Workspace/ML/flowers_detection/flowers"
+  datasets_path: "/Users/aurorastudyvn/Workspace/ML/flowers_detection/data/datasets"
+  image_size: [200, 200]
+  batch_size: 32
+  validation_split: 0.2
+  image_per_class: 100
+
+model:
+  input_shape: [200, 200, 3]
+  num_classes: 10
+  base_model: "MobileNetV2" # "EfficientNetB0", "ResNet50"
+  dropout_rate: 0.3
+  learning_rate: 0.001
+
+training:
+  epochs: 20
+  early_stopping_patience: 5
+  checkpoint_path: "saved_models/flowers_transfer.model.keras"
+  tensorboard_log_dir: "logs/"
+
+augmentation:
+  horizontal_flip: true
+  vertical_flip: true
+  rotation_range: 0.4
+  zoom_range: 0.2
+  contrast_range: 0.2
+  brightness_range: 0.2
+  translation_range: [0.2, 0.2]
+
+classes:
+  - "Hoàng Hậu"
+  - "Trang"
+  - "Trang Trắng"
+  - "Dừa Cạn"
+  - "Cúc"
+  - "Giấy"
+  - "Đại Tướng Quân"
+  - "Lan"
+  - "Loa Kèn"
+  - "Bằng Lăng"

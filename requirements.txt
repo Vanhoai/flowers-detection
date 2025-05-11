@@ -1,0 +1,10 @@
+tensorflow
+tensorflow-macos
+opencv-python
+matplotlib
+mlx
+keras
+tensorflow-metal
+pyyaml
+scikit-learn
+seaborn
