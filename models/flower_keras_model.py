@@ -4,7 +4,7 @@ from keras.src.applications import mobilenet_v2, efficientnet, resnet, vgg16
 from .base_model import BaseModel
 
 
-class FlowerClassificationModel(BaseModel):
+class FlowerClassificationKerasModel(BaseModel):
     def __init__(self, config):
         super().__init__(config)
         self.input_shape = tuple(config["model"]["input_shape"])

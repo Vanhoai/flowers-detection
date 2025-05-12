@@ -1,17 +1,11 @@
 install:
 	pip install -r requirements.txt
 
-train-new:
-	python main.py --is_new_training
-
-train-finetune:
-	python main.py --is_new_training --fine_tune
+load:
+	./scripts/tools.sh -m load
 
 train:
-	python main.py
+	./scripts/train.sh -f pytorch -m train
 
-pred:
-	python predict.py --image path/to/image.jpg
-
-pred-dir:
-	python predict.py --dir path/to/image/folder
+plot-datasets:
+	./scripts/tools.sh -m plot -i 10

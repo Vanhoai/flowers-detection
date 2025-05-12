@@ -1,8 +1,8 @@
 import os
 import numpy as np
 import cv2
-import tensorflow as tf
 import yaml
+import scipy.io as sio
 from keras import Sequential, utils
 from keras.src.layers import (
     RandomFlip,
@@ -20,7 +20,15 @@ class DataLoader:
             self.config = yaml.safe_load(file)
 
         # data
-        self.datasets_path = self.config["data"]["datasets_path"]
+        self.is_own_dataset = self.config["data"]["is_own_dataset"]
+        if self.is_own_dataset:
+            self.datasets_path = self.config["data"]["datasets_path"]
+        else:
+            self.datasets_path = self.config["data"]["datasets_102_path"]
+            self.datasets_102_labels_path = self.config["data"][
+                "datasets_102_labels_path"
+            ]
+
         self.image_size = tuple(self.config["data"]["image_size"])
         self.batch_size = int(self.config["data"]["batch_size"])
         self.test_split = float(self.config["data"]["test_split"])
@@ -31,30 +39,33 @@ class DataLoader:
         self.classes = self.config["classes"]
         self.num_classes = len(self.classes)
 
-        # create data augmentation pipeline
-        self.data_augmentation = Sequential(
-            [
-                RandomFlip("horizontal_and_vertical"),
-                RandomRotation(self.config["augmentation"]["rotation_range"]),
-                RandomZoom(self.config["augmentation"]["zoom_range"]),
-                RandomContrast(self.config["augmentation"]["contrast_range"]),
-                RandomBrightness(self.config["augmentation"]["brightness_range"]),
-            ]
-        )
-
-        has_translation_range = (
-            "translation_range" in self.config["augmentation"].keys()
-        )
-        if has_translation_range:
-            random_translation = RandomTranslation(
-                self.config["augmentation"]["translation_range"][0],
-                self.config["augmentation"]["translation_range"][1],
+        # only create data augmentation pipeline if own dataset
+        if self.is_own_dataset:
+            # create data augmentation pipeline
+            self.data_augmentation = Sequential(
+                [
+                    RandomFlip("horizontal_and_vertical"),
+                    RandomRotation(self.config["augmentation"]["rotation_range"]),
+                    RandomZoom(self.config["augmentation"]["zoom_range"]),
+                    RandomContrast(self.config["augmentation"]["contrast_range"]),
+                    RandomBrightness(self.config["augmentation"]["brightness_range"]),
+                ]
             )
-            self.data_augmentation.add(random_translation)
 
-    def load_data(self):
+            has_translation_range = (
+                "translation_range" in self.config["augmentation"].keys()
+            )
+            if has_translation_range:
+                random_translation = RandomTranslation(
+                    self.config["augmentation"]["translation_range"][0],
+                    self.config["augmentation"]["translation_range"][1],
+                )
+                self.data_augmentation.add(random_translation)
+
+    def load_own_data(self):
         X = np.zeros((self.nums_classes * self.ipc, *self.image_size, 3), dtype=int)
         y = np.zeros(self.nums_classes * self.ipc, dtype=int)
+
         for i in range(self.nums_classes):
             y[i * self.ipc : (i + 1) * self.ipc] = i
 
@@ -109,6 +120,33 @@ class DataLoader:
         y = y_cleaned
 
         return X, y
+
+    def load_102_flower_datasets(self):
+        files = os.listdir(self.datasets_path)
+        size = len(files)
+
+        # Load images
+        X = np.zeros((size, *self.image_size, 3), dtype=int)
+        files.sort()
+        for i in range(size):
+            file = os.path.join(self.datasets_path, files[i])
+            img = cv2.imread(file)
+            img = cv2.resize(img, (200, 200))
+
+            X[i] = img
+
+        # Load mat file label
+        y = np.zeros(size, dtype=int)
+        mat = sio.loadmat(os.path.join(self.datasets_102_labels_path))
+        y = mat["labels"]
+
+        return X, y
+
+    def load_data(self):
+        if self.is_own_dataset:
+            return self.load_own_data()
+        else:
+            return self.load_102_flower_datasets()
 
     def prepare_datasets(
         self,

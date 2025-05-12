@@ -44,6 +44,7 @@ logs/
 
 # only source testing
 flowers
+datasets/102
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

@@ -1,5 +1,8 @@
 data:
   datasets_path: "/Users/aurorastudyvn/Workspace/ML/flowers_detection/datasets/raw"
+  datasets_102_path: "/Users/aurorastudyvn/Workspace/ML/flowers_detection/datasets/102"
+  datasets_102_labels_path: "/Users/aurorastudyvn/Workspace/ML/flowers_detection/datasets/102_category_labels.mat"
+  is_own_dataset: false
   image_size: [200, 200]
   batch_size: 32
   test_split: 0.2
