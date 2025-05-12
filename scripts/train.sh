@@ -4,10 +4,10 @@ show_help() {
     echo "How to use:"
     echo ""
     echo "Options:"
-    echo "  -f, --framework <keras|pytorch>  Choice a framework [keras|pytorch] - default is pytorch"
-    echo "  -m, --mode <train|finetune>      Choice a mode [train|finetune] - default is train"
-    echo "  -l, --layers <number>            The number of layers to unfreeze if mode is finetune - default is 5"
-    echo "  -h, --help                       Show help"
+    echo "  -f, --framework <keras|pytorch>         Choice a framework [keras|pytorch] - default is pytorch"
+    echo "  -m, --mode <build|train|finetune>       Choice a mode [build|train|finetune] - default is build"
+    echo "  -l, --layers <number>                   The number of layers to unfreeze if mode is finetune - default is 5"
+    echo "  -h, --help                              Show help"
     echo ""
     echo "For instance:"
     echo "  $0 -f pytorch -m train"
@@ -16,7 +16,7 @@ show_help() {
 }
 
 FRAMEWORK="pytorch"
-MODE="train"
+MODE="build"
 LAYERS=5
 
 if [ $# -eq 0 ]; then
@@ -35,7 +35,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         -m|--mode)
             MODE="$2"
-            if [[ "$MODE" != "train" && "$MODE" != "finetune" ]]; then
+            if [[ "$MODE" != "train" && "$MODE" != "finetune" && "$MODE" != "build" ]]; then
                 echo "Mode must be 'train' or 'finetune'"
                 exit 1
             fi
@@ -69,7 +69,7 @@ CMD="python main.py --framework $FRAMEWORK"
 if [ "$MODE" == "finetune" ]; then
     CMD="$CMD --mode finetune --layers $LAYERS"
 else
-    CMD="$CMD --mode train"
+    CMD="$CMD --mode $MODE"
 fi
 
 eval $CMD

@@ -1,13 +1,12 @@
 data:
   datasets_path: "/Users/aurorastudyvn/Workspace/ML/flowers_detection/datasets/raw"
-  datasets_102_path: "/Users/aurorastudyvn/Workspace/ML/flowers_detection/datasets/102"
-  datasets_102_labels_path: "/Users/aurorastudyvn/Workspace/ML/flowers_detection/datasets/102_category_labels.mat"
   is_own_dataset: false
   image_size: [200, 200]
   batch_size: 32
   test_split: 0.2
   validation_split: 0.2
   image_per_class: 120
+  is_cache: true
 
 model:
   input_shape: [200, 200, 3]
@@ -17,6 +16,7 @@ model:
   learning_rate: 0.001
 
 training:
+  is_cache: true
   epochs: 30
   early_stopping_patience: 5
   checkpoint_path: "saved/model.keras"

@@ -3,10 +3,11 @@ from enum import Enum
 
 
 frameworks = ["keras", "pytorch"]
-modes = ["train", "finetune", "plot", "load"]
+modes = ["train", "finetune", "plot", "load", "build"]
 
 
 class Modes(Enum):
+    BUILD = "build"
     TRAIN = "train"
     FINETUNE = "finetune"
     PLOT = "plot"
@@ -35,6 +36,14 @@ def parse_arguments():
     )
 
     parser.add_argument(
+        "--cache",
+        type=str,
+        default="true",
+        choices=["true", "false"],
+        help="Use cache (true or false) when load datasets",
+    )
+
+    parser.add_argument(
         "--layers",
         type=int,
         default=5,
@@ -54,6 +63,7 @@ def parse_arguments():
     print("=================== Parse Arguments ===================")
     print(f"Framework: {args.framework}")
     print(f"Mode: {args.mode}")
+    print(f"Use cache: {args.cache}")
     print(f"Number of layers to unfreeze: {args.layers}")
     print(f"Number of images to plot: {args.images}")
     print("======================================================")

@@ -16,55 +16,71 @@ from evaluation.metrics import (
     per_class_accuracy,
 )
 from utils.arguments import parse_arguments, Modes
-from executes import load_datasets
+from executes import load_datasets, split_datasets, load_vars
+
+
+# def main():
+#     args = parse_arguments()
+#     args.config = "config/config.yaml"
+
+#     with open(args.config, "r") as file:
+#         config = yaml.safe_load(file)
+
+#     data_loader = DataLoader(args.config)
+#     match args.mode:
+#         case Modes.LOAD.value:
+#             X, y = load_datasets(data_loader, args.cache)
+#             split_datasets(data_loader, X, y)
+
+#         case Modes.PLOT.value:
+#             X_train, y_train, _, _ = load_vars()
+#             plot_sample_images(X_train, y_train, data_loader.classes)
+
+#         case Modes.BUILD.value:
+#             print("Build Model")
+#             pass
+#         case Modes.TRAIN.value:
+#             print("Train")
+#             pass
+
+#         case Modes.FINETUNE.value:
+#             print("Finetune")
+#             pass
 
 
 def main():
-    args = parse_arguments()
-    args.config = "config/config.yaml"
-
-    with open(args.config, "r") as file:
+    path = "config/config.yaml"
+    with open(path, "r") as file:
         config = yaml.safe_load(file)
 
-    data_loader = DataLoader(args.config)
-    match args.mode:
-        case Modes.LOAD.value:
-            X, y = load_datasets(data_loader)
-            X_train, y_train, X_test, y_test = data_loader.prepare_datasets(X, y)
-            print(X_train.shape, y_train.shape, X_test.shape, y_test.shape)
-            pass
+    # load datasets
+    data_loader = DataLoader(path)
+    X, y = data_loader.load_data()
 
-        case Modes.TRAIN.value:
-            print("Train")
-            pass
+    # split datasets
+    X_train, y_train, X_test, y_test = data_loader.prepare_datasets(X, y)
+    print("X_train shape:", X_train.shape)
+    print("y_train shape:", y_train.shape)
+    print("X_test shape:", X_test.shape)
+    print("y_test shape:", y_test.shape)
+    # plot_sample_images(X_train, y_train, data_loader.classes)
 
-        case Modes.FINETUNE.value:
-            print("Finetune")
-            pass
+    # build models
+    flower_classification_model = FlowerClassificationKerasModel(config)
+    if config["training"]["is_cache"] is True or not os.path.exists(
+        config["training"]["checkpoint_path"]
+    ):
+        print("Build new model from scratch")
+        flower_classification_model.build()
+    else:
+        print(f"Load model from {config['training']['checkpoint_path']}")
+        flower_classification_model.load(config["training"]["checkpoint_path"])
 
-        case Modes.PLOT.value:
-            print("Plot")
-            pass
-
-    # print("=================== Show Sample Images ===================")
-    # plot_sample_images(X_train, y_train, config["classes"])
-
-    # print("=================== Build Model ===================")
-    # flower_classification_model = FlowerClassificationKerasModel(config)
-    # if args.is_new_training or not os.path.exists(
-    #     config["training"]["checkpoint_path"]
-    # ):
-    #     print("Build new model from scratch")
-    #     flower_classification_model.build()
-    # else:
-    #     print(f"Load model from {config['training']['checkpoint_path']}")
-    #     flower_classification_model.load(config["training"]["checkpoint_path"])
-
-    # flower_classification_model.compile()
-    # flower_classification_model.summary()
+    flower_classification_model.compile()
+    flower_classification_model.summary()
 
     # print("=================== Training Model ===================")
-    # trainer = ModelTrainer(flower_classification_model.model, args.config)
+    # trainer = ModelTrainer(flower_classification_model.model, path)
     # hist = trainer.train(X_train, y_train)
     # np.save("saved/hist.npy", hist)
 
@@ -83,8 +99,8 @@ def main():
     #     trainer.plot_training_history(history_ft.history)
 
     # print("=================== Prediction ===================")
-    # y_pred = flower_classification_model.predict(X_test)
-    # evaluate_model_classification(y_test, y_pred, config["classes"])
+    y_pred = flower_classification_model.predict(X_test)
+    evaluate_model_classification(y_test, y_pred, config["classes"])
 
     # print("=================== Confusion Matrix ===================")
     # plot_confusion_matrix(y_test, y_pred, config["classes"])

@@ -6,7 +6,7 @@ import cv2
 import tensorflow as tf
 
 
-def plot_sample_images(X, y, classes, n_samples=10, figsize=(15, 8)):
+def plot_sample_images(X, y, classes, n_samples=10):
     n_cols = 5
     n_rows = 2
 

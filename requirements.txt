@@ -9,3 +9,5 @@ pyyaml
 scikit-learn
 seaborn
 scipy
+torch
+torchvision
