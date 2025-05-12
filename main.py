@@ -67,7 +67,7 @@ def main():
 
     # build models
     flower_classification_model = FlowerClassificationKerasModel(config)
-    if config["training"]["is_cache"] is True or not os.path.exists(
+    if config["training"]["is_cache"] is False or not os.path.exists(
         config["training"]["checkpoint_path"]
     ):
         print("Build new model from scratch")
@@ -86,7 +86,7 @@ def main():
 
     # print("=================== Draw Learning Curves ===================")
     # items = np.load("saved/hist.npy", allow_pickle=True).item()
-    # trainer.plot_training_history(items.history)
+    # # trainer.plot_training_history(items.history)
     # plot_learning_curves(items.history)
 
     # if args.fine_tune:
@@ -98,19 +98,19 @@ def main():
     #     print("=================== Draw Learning Curves ===================")
     #     trainer.plot_training_history(history_ft.history)
 
-    # print("=================== Prediction ===================")
+    print("=================== Prediction ===================")
     y_pred = flower_classification_model.predict(X_test)
     evaluate_model_classification(y_test, y_pred, config["classes"])
 
-    # print("=================== Confusion Matrix ===================")
-    # plot_confusion_matrix(y_test, y_pred, config["classes"])
+    print("=================== Confusion Matrix ===================")
+    plot_confusion_matrix(y_test, y_pred, config["classes"])
 
-    # print("=================== Accuracy per Class ===================")
-    # per_class_accuracy(y_test, y_pred, config["classes"])
+    print("=================== Accuracy per Class ===================")
+    per_class_accuracy(y_test, y_pred, config["classes"])
 
-    # print("=================== Visualize Image Predicted ===================")
-    # y_pred = flower_classification_model.predict(X_test)
-    # visualize_model_predictions(X_test, y_pred, config["classes"])
+    print("=================== Visualize Image Predicted ===================")
+    y_pred = flower_classification_model.predict(X_test)
+    visualize_model_predictions(X_test, y_pred, config["classes"])
 
 
 if __name__ == "__main__":

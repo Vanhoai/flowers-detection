@@ -4,6 +4,9 @@ install:
 run:
 	python main.py
 
+run-torch:
+	python exec_torch.py
+
 load:
 	./scripts/tools.sh -m load 
 

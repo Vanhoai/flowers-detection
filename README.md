@@ -233,14 +233,19 @@ plt.show()
 
 ## 📊 Results
 
-### Classification Performance
+### Classification Performance (Own Datasets)
 
-| Model           | Framework | Accuracy | F1 Score | Training Time |
-| --------------- | --------- | -------- | -------- | ------------- |
-| ResNet50        | PyTorch   | 94.2%    | 0.93     | 3.5h          |
-| EfficientNet-B3 | PyTorch   | 95.8%    | 0.95     | 5.2h          |
-| VGG16           | Keras     | 92.5%    | 0.92     | 4.1h          |
-| MobileNetV2     | Keras     | 93.1%    | 0.93     | 2.8h          |
+| Model           | Framework | Accuracy | Precision | F1 Score |
+| --------------- | --------- | -------- | --------  | -------- |
+| VGG16           | Keras     | 95.82%   | 96.00%    | 95.77%   |
+| ResNet50        | Keras     | 97.91%   | 97.96%    | 97.91%   |
+
+### Classification Performance (102 Flower Dataset)
+
+| Model           | Framework | Accuracy | Precision | F1 Score |
+| --------------- | --------- | -------- | --------  | -------- |
+| EfficientNet-B3 | PyTorch   | 95.8%    | 0.95      | 0.95     |
+| MobileNetV2     | PyTorch   | 93.1%    | 0.93      | 0.93     |
 
 ### Detection Performance
 

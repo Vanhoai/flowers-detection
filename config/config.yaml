@@ -11,7 +11,7 @@ data:
 model:
   input_shape: [200, 200, 3]
   num_classes: 10
-  base_model_name: "VGG16"
+  base_model_name: "ResNet50"
   dropout_rate: 0.3
   learning_rate: 0.001
 
